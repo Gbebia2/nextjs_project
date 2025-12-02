@@ -7,15 +7,18 @@ export const authConfig = {
   callbacks: {
     authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user;
-      const isOnDashboard = nextUrl.pathname.startsWith('/dashboard');
-      if (isOnDashboard) {
-        if (isLoggedIn) return true;
-        return false; // Redirect unauthenticated users to login page
-      } else if (isLoggedIn) {
-        return Response.redirect(new URL('/dashboard', nextUrl));
+      const isOnLoginPage = nextUrl.pathname.startsWith('/login');
+
+      if (isOnLoginPage) {
+        if (isLoggedIn) {
+          // Redirect logged-in users away from the login page
+          return Response.redirect(new URL('/dashboard', nextUrl));
+        }
+        return true; // Allow logged-out users to view the login page
       }
-      return true;
+      // Block all other pages if the user is not logged in
+      return isLoggedIn;
     },
   },
-  providers: [], // Add providers with an empty array for now
+  providers: [],
 } satisfies NextAuthConfig;
